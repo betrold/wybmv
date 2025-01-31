@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valentine's Surprise</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Pacifico&display=swap');
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #ffeff6;
+            overflow: hidden;
+        }
+
+        .container {
+            position: relative;
+            perspective: 1000px;
+        }
+
+        .envelope {
+            position: relative;
+            width: 600px;
+            height: 450px;
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transition: all 0.8s cubic-bezier(0.4, 0.2, 0.2, 1);
+        }
+
+        .envelope-front {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(255, 117, 140, 0.3);
+            backface-visibility: hidden;
+            overflow: hidden;
+        }
+
+        .envelope-front::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            clip-path: polygon(0 0, 100% 0, 50% 50%);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .heart-seal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 4rem;
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .card {
+            position: absolute;
+            width: 90%;
+            height: 80%;
+            background: #fff;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            backface-visibility: hidden;
+            transform: rotateY(180deg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card-front {
+            transform: rotateY(0deg);
+        }
+
+        .card-back {
+            background: linear-gradient(45deg, #fff5f7, #ffeef2);
+            display: none;
+        }
+
+        .envelope.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .question {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2.5rem;
+            color: #ff758c;
+            text-align: center;
+            margin-bottom: 30px;
+            margin-top: 170px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 20px;
+            position: relative;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 30px;
+            font-family: 'Pacifico', cursive;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .btn:hover::before {
+            opacity: 1;
+        }
+
+        #btn-yes {
+            background: #ff758c;
+            color: white;
+            transform: scale(1);
+        }
+
+        #btn-no {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .response {
+            font-family: 'Pacifico', cursive;
+            font-size: 2rem;
+            color: #ff758c;
+            text-align: center;
+            line-height: 1.4;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+            background-image: ;
+        }
+
+        .response.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .hearts {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .heart {
+            position: absolute;
+            color: #ff758c;
+            animation: float 4s linear infinite;
+            opacity: 0;
+        }
+
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) scale(0.5); opacity: 0; }
+            20% { opacity: 1; }
+            100% { transform: translateY(-100vh) scale(1.2); opacity: 0; }
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ff758c;
+            animation: confetti-fall 3s linear;
+        }
+
+        @keyframes confetti-fall {
+            0% { transform: translateY(-100vh) rotate(0deg); }
+            100% { transform: translateY(100vh) rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="envelope">
+            <div class="envelope-front" onclick="flipEnvelope()">
+                <div class="heart-seal">💌</div>
+            </div>
+            <div class="card">
+                <p class="question" id="question">Will you be my Valentine? 🌹</p>
+                <div class="buttons">
+                    <button class="btn" id="btn-yes" onclick="showResponse()">Yes!</button>
+                    <button class="btn" id="btn-no" onmouseover="dodgeButton()" onclick="persuade()">Ayoko nga! 😤</button>
+                </div>
+                <p class="response">Yaaaaaayyyy!💖<br>Can't wait to see you on Valentine's Day! 🌸</p>
+            </div>
+        </div>
+        <div class="hearts" id="hearts"></div>
+    </div>
+
+    <script>
+        function createHearts() {
+            const heartsContainer = document.getElementById('hearts');
+            for (let i = 0; i < 20; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'heart';
+                heart.style.left = Math.random() * 100 + '%';
+                heart.style.animationDelay = Math.random() * 2 + 's';
+                heart.innerHTML = '❤️';
+                heartsContainer.appendChild(heart);
+            }
+        }
+
+        function flipEnvelope() {
+            const envelope = document.querySelector('.envelope');
+            envelope.classList.add('flipped');
+        }
+
+        function showResponse() {
+            // Hide the buttons
+            document.getElementById('btn-yes').classList.add('hidden');
+            document.getElementById('btn-no').classList.add('hidden');
+            document.getElementById('question').classList.add('hidden');
+
+            // Show the response message
+            document.querySelector('.response').classList.add('visible');
+
+            // Trigger animations
+            createConfetti();
+            createHearts();
+        }
+
+        let persuasionCount = 0;
+        const noButtonTexts = [
+            "Ayoko nga! 😤",
+            "Makulit ka ba? 😠",
+            "Sino ka ba!? 😡",
+            "Sapakin ko mukha mo! 👊",
+            "Baliw ka ba? 🤪",
+            "Di ka naman si Aaron Pierre! 🐻",
+            "Aw hell nah! 💀",
+        ];
+
+        function persuade() {
+            const noBtn = document.getElementById('btn-no');
+            const yesBtn = document.getElementById('btn-yes');
+            
+            if (persuasionCount < noButtonTexts.length) {
+                noBtn.textContent = noButtonTexts[persuasionCount];
+                yesBtn.style.transform = `scale(${1 + persuasionCount * 0.1})`;
+                persuasionCount++;
+            } else {
+                window.location.href = 'https://youtu.be/qQrvoDzzLfk?si=ljEhPQboDYu1JOSn';
+            }
+        }
+
+        function dodgeButton() {
+            const noBtn = document.getElementById('btn-no');
+            noBtn.style.transform = `translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px)`;
+            noBtn.style.transition = 'transform 0.3s ease-out';
+        }
+
+        function createConfetti() {
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.background = `hsl(${Math.random() * 360}, 70%, 60%)`;
+                confetti.style.animationDelay = Math.random() * 2 + 's';
+                document.body.appendChild(confetti);
+                
+                setTimeout(() => confetti.remove(), 3000);
+            }
+        }
+    </script>
+</body>
+</html>
